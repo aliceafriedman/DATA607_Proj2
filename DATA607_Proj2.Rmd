@@ -193,7 +193,7 @@ Seasons <- Seasons %>%
 kable(Seasons, caption = "Simposons Seasons, via Wikipedia")
 ```
   
-###1.5 Analysis
+###1.6 Analysis
   
 Whew! What a lot of work. Now that our data is clean, we can perform some analysis.
   
@@ -226,3 +226,46 @@ Seasons %>%
     caption="Source: 'https://en.wikipedia.org/wiki/List_of_The_Simpsons_episodes'")
 
 ```
+  
+  
+##Dataset #2: San Francisco Food Trucks
+
+###2.1 Read data from CSV
+First, we will read the data from a CSV.
+  
+```{r}
+
+food.raw <- read.csv("https://raw.githubusercontent.com/aliceafriedman/DATA607_Proj2/master/Mobile_Food_Facility_Permit.csv", sep=",", header = TRUE)
+```
+
+###2.2 Tidy Data
+  
+This data is fairly tidy already. One column which could reasonably be split are the days and hours a food truck is open, currently located in one column, "dayshours".
+
+ 
+```{r}
+library(tidyr)
+food <- food.raw %>% separate(dayshours, c("Days", "Hours"), sep=":")
+```
+  
+We can also replace data coded as "Mo/Tu/We/Th/Fr" as "Mo-Fr" for consistency.
+  
+```{r}
+food <- food %>% 
+  mutate(
+    Days = str_replace_all(food$Days, "Mo/Tu/We/Th/Fr", "Mo-Fr"),
+    Days = str_replace_all(food$Days, "Mo/Mo/Mo/Mo/Mo", "Mo"))
+
+```
+   
+More tidying could be done--this data would best be split into 14 columns, one for hours open each day and one for closing hour each day, where days closed will just be NA. Just this small amount of tidying will allow us to do the below analysis.
+
+###2.3 Analysis
+
+How many food trucks are open each combination of days?
+
+```{r}
+Open <- food %>% group_by(Days) %>% summarize(n=n()) %>% arrange(desc(n))
+kable(Open)
+```
+
